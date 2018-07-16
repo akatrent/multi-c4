@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <title>Start</title>  
+  </head>
+    <body>
+        <h1>Dude (use i, j, k, l to move )</h1>
+        
+        <canvas id="ctx" width="500" height="500" style="border: 1px solid #000;"></canvas>
+    </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+    <script>
+        let ctx = document.getElementById("ctx").getContext("2d");
+        ctx.font = '30px Arial';
+        const socket = io();
+      
+        // newPosition is called on the server from setInterval
+        socket.on('newPositions', (data) => {
+            ctx.clearRect(0, 0, 500, 500);
+            for(let i = 0; i < data.length; i++){
+                ctx.fillText(data[i].number, data[i].x, data[i].y);
+            }
+        });
+
+        document.onkeydown = (event) => {
+            if(event.keyCode === 73){
+                socket.emit('keyPress',{inputId:'up', state:true});
+            } // i - up 
+            else if(event.keyCode === 76){
+                socket.emit('keyPress',{inputId:'right', state:true});
+            } // l - right 
+            else if(event.keyCode === 75){
+                socket.emit('keyPress',{inputId:'down', state:true});
+            } // k - down 
+            else if(event.keyCode === 74){
+                socket.emit('keyPress',{inputId:'left', state:true});
+            } // j left 
+        }
+
+        document.onkeyup = (event) => {
+            if(event.keyCode === 73){
+                socket.emit('keyPress',{inputId:'up', state:false});
+            } // i - up 
+            else if(event.keyCode === 76){
+                socket.emit('keyPress',{inputId:'right', state:false});
+            } // l - right 
+            else if(event.keyCode === 75){
+                socket.emit('keyPress',{inputId:'down', state:false});
+            } // k - down 
+            else if(event.keyCode === 74){
+                socket.emit('keyPress',{inputId:'left', state:false});
+            } // j - left
+        }
+        socket.on('serverMsg', (data) => {
+            console.log(data.msg);
+        });
+    </script>
+</html>
