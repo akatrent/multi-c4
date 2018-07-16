@@ -3,7 +3,7 @@ const app = express();
 const serv = require('http').Server(app);
 const io = require('socket.io')(serv, {});
 
-/* EC2 paths 
+// EC2 paths 
 app.get('/', (req, res) => {
 	res.sendFile('/home/ec2-user/client/index.html');
 });
@@ -12,8 +12,8 @@ app.use('/home/ec2-user/client', express.static('/home/ec2-user/client'));
 serv.on('error', (err) => {
 	console.error('Server error: ', err);
 });
-*/
-// local paths
+
+/* local paths
 app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/client/index.html');
 });
@@ -22,7 +22,7 @@ app.use(express.static('client'));
 serv.on('error', (err) => {
 	console.error('Server error: ', err);
 });
-
+*/
 
 
 serv.listen(9000);
