@@ -32,10 +32,11 @@ let SOCKET_LIST = {};
 let PLAYER_LIST = {};
 
 class Player {
-	constructor(id){
+	constructor(id, x, y, color){
 		this.id = id;
-		this.x = 250;
-		this.y = 250;
+		this.x = x;
+		this.y = y;
+		this.color = color;
 		this.number = '' + Math.floor(10 * Math.random())
 		this.pressingRight = false;
 		this.pressingLeft = false;
@@ -63,7 +64,7 @@ io.sockets.on('connection', (socket) => {
 	console.log('socket connection');
 	socket.id = Math.random();
 	SOCKET_LIST[socket.id] = socket;
-	let player = new Player(socket.id);
+	let player = new Player(socket.id, 250, 250, 'black');
 	PLAYER_LIST[socket.id] = player;
 	socket.on('disconnect', function(){
 		delete SOCKET_LIST[socket.id];
