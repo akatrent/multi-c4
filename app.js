@@ -59,6 +59,17 @@ class Player {
 	}
 }
 
+class Board {
+	constructor(){
+		this.cell = {}
+		this.color = '';
+	}
+	updateBoard(){
+		this.cell = this.cell;
+		this.color = this.color;
+	}
+}
+
 io.sockets.on('connection', (socket) => {
 	console.log('socket connection');
 	socket.id = Math.random();
