@@ -16,3 +16,13 @@ console.log(`player id is ${player.id},
 x position is ${player.x}, 
 y position is ${player.y}, 
 player color is ${player.color}`);
+
+/*
+Expected output:
+
+player id is 1, 
+x position is 200, 
+y position is 225, 
+player color is black
+
+*/
