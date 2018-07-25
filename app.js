@@ -1,9 +1,6 @@
-const express = require('express');
-const app = express();
-const serv = require('http').Server(app);
-const io = require('socket.io')(serv, {});
 
-// EC2 paths 
+
+/* EC2 paths 
 app.get('/', (req, res) => {
 	res.sendFile('/home/ec2-user/client/index.html');
 });
@@ -13,7 +10,7 @@ serv.on('error', (err) => {
 	console.error('Server error: ', err);
 });
 
-/* local paths
+ local paths
 app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/client/index.html');
 });
@@ -23,46 +20,83 @@ serv.on('error', (err) => {
 	console.error('Server error: ', err);
 });
 */
+const express = require('express');
+const app = express();
+const serv = require('http').Server(app);
+const io = require('socket.io')(serv, {});
 
-
+app.get('/', (req, res) => {
+    //ec2- path
+//	res.sendFile('/home/ec2-user/client/index.html');
+    res.sendFile(__dirname + '/client/connect4.html');
+});
+//ec2- path
+//app.use('/home/ec2-user/client', express.static('/home/ec2-user/client'));
+//app.use('/client', express.static(__dirname +'/client'));
+app.use(express.static('client'));
+serv.on('error', (err) => {
+	console.error('Server error: ', err);
+})
 serv.listen(9000);
 console.log("server started");
 
 let SOCKET_LIST = {};
 let PLAYER_LIST = {};
+let playerCount = 0;
+let board; 
+
+let waitingPlayer = null;
 
 class Player {
-	constructor(id){
+	constructor(id, color){
+		this.name = '';
 		this.id = id;
-		this.x = 250;
-		this.y = 250;
-		this.number = '' + Math.floor(10 * Math.random())
-		this.pressingRight = false;
-		this.pressingLeft = false;
-		this.pressingUp= false;
-		this.pressingDown = false;
-		this.maxSpd = 10;
+		this.drag = false;
+		this.color = color;
+		this.currentTurn = true;
+		this.emptyPiece = true;
+		if(color == 'black'){
+			this.x = 50;
+			this.y = 350;
+			this.movingX = 50;
+			this.movingY = 350;
+		} else {
+			this.x = 775;
+			this.y = 350;
+			this.movingX = 775;
+			this.movingY = 350;
+		}
+		
+		console.log('player id ' + this.id + " " + this.name + " " + this.color + " " + this.emptyPiece);
 	}
 	updatePosition(){
-		if(this.pressingRight){
-			this.x += this.maxSpd;
+		if(this.drag){
+			this.x = this.movingX;
+			this.y = this.movingY;
 		}
-		if(this.pressingLeft){
-			this.x -= this.maxSpd;
-		}
-		if(this.pressingUp){
-			this.y -= this.maxSpd;
-		}
-		if(this.pressingDown){
-			this.y += this.maxSpd;
-		}
+	}
+	updateTurn(turn){
+		this.currentTurn = turn;
+	}
+
+	getPlayerName(){
+		return this.name;
+	}
+
+	getPlayerColor(){
+		return this.color;
+	}
+
+	getCurrentTurn(){
+		return this.currentTurn;
 	}
 }
 
 class Board {
 	constructor(){
-		this.cell = {}
+		this.cell = {};
 		this.color = '';
+
 	}
 	updateBoard(){
 		this.cell = this.cell;
@@ -72,53 +106,97 @@ class Board {
 
 io.sockets.on('connection', (socket) => {
 	console.log('socket connection');
-	socket.id = Math.random();
-	SOCKET_LIST[socket.id] = socket;
-	let player = new Player(socket.id);
-	PLAYER_LIST[socket.id] = player;
-	socket.on('disconnect', function(){
-		delete SOCKET_LIST[socket.id];
-		delete PLAYER_LIST[socket.id];
+	playerCount++;
+	//console.log('socket: ', socket);
+	console.log('socket id: ', socket.id);
+	//socket.id = playerCount
+	if(playerCount % 2 == 0){
+		var player = new Player(socket.id, 'red');
+	}else{
+		var player = new Player(socket.id, 'black');
+	}
+	socket.emit('turn', {color: player.color});
+	SOCKET_LIST[player.id] = socket;
+	PLAYER_LIST[player.id] = player;
+	board = new Board();
+	//console.log(player.id);
+	
+	socket.on('disconnect', () =>{
+		delete SOCKET_LIST[player.id];
+		delete PLAYER_LIST[player.id];
 	});
 
-	socket.on('keyPress', (data) => {
-		if(data.inputId === 'up'){
-			player.pressingUp = data.state;
-		}
-		else if(data.inputId === 'right'){
-			player.pressingRight = data.state;
-		}
-		else if(data.inputId === 'down'){
-			player.pressingDown = data.state;
-		}
-		else if(data.inputId === 'left'){
-			player.pressingLeft = data.state;
-		}
+	socket.on('moveUpdate', (data) => {
+		//console.log('cordX: ' + data.cordX + 'cordY: ' + data.cordY);
+		player.movingX = data.cordX;
+		player.movingY = data.cordY;
+		player.drag = data.drag;
+
+		updater();
 	});
 
-	socket.on('goodNews', (data) => {
-		console.log('Good News ' + data.reason);
+	socket.on('emptyPiece', (data) => {
+		player.emptyPiece = data.emptyPiece;
+	})
+
+	socket.on('boardUpdate', (data) =>{
+		board.cell = data.cell;
+		board.color = data.color;
 	});
 
 	socket.emit('serverMsg', {
 		msg: 'message sent from server',
 	});
-});
 
-// maybe change this to request animationframe
-setInterval(function(){
-	let pack = [];
-	for(let i in PLAYER_LIST){
-		let player = PLAYER_LIST[i];
-		player.updatePosition();
+
+/*
+
+
+	function updater(){
+		let pack = [];
+		player = player;
+		player.updatePosition()
 		pack.push({
 			x:player.x,
 			y:player.y,
-			number:player.number
+			number:player.id,
+			color:player.color,
 		});
+		socket.emit('updater', pack);
+
+*/
+/*
+		for(let i in SOCKET_LIST){
+			let iSocket = SOCKET_LIST[i];
+			iSocket.emit('updater', pack);
+		}
+		*/
+	
+
+	function updater(){
+		let pack = [];
+		for(let i in PLAYER_LIST){
+			let curPlayer = PLAYER_LIST[i];
+			curPlayer.updatePosition();
+			board.updateBoard();
+			pack.push({
+				x:curPlayer.x,
+				y:curPlayer.y,
+				number:curPlayer.id,
+				//color:curPlayer.color,
+				board:board.cell,
+				boardColor:board.color,
+				emptyPiece:curPlayer.emptyPiece,
+			});
+		}
+		for(let i in SOCKET_LIST){
+			let iSocket = SOCKET_LIST[i];
+			iSocket.emit('updater', pack);
+		}
+
 	}
-	for(let i in SOCKET_LIST){
-		let socket = SOCKET_LIST[i];
-		socket.emit('newPositions', pack);
-	}
-},1000/25);
+	//updater();
+});
+
+
+

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <title>c4</title> 
+      <link rel="stylesheet" type="text/css" href="/styles/c4.css">
+  </head>
+    <body>
+		<!-- Game start modal -->
+		<div id="startModal" class="modal">
+			<!-- Modal content -->
+			<div class="modal-content">
+		  		<span id="closeStart" class="close">&times;</span>
+		 	 	<div class="container">
+					<div id="menu" class="menu">
+						<h1>Welcome to CST 438 Connect 4 game</h1>
+						<h1>Multi-Player Connect 4</h1>
+						<input id="userName" type="text" name="name" placeholder="Enter your name" required>
+						<button id="newGame">Join</button>
+						
+					</div>
+			  	</div>
+			</div>
+		</div>
+		
+		<div id="main">
+			<h3 id="turn"></h3>	
+				<svg viewbox="0 0 860 600" xmlns="http://www.w3.org/2000/svg">
+					<defs>
+						<path id="board-yellow" style="fill: #fff34b;" d="M0 0 H81 V81 H0z M 40 60 m -5, -50 a 30,30 0 1,0 10,0"/>
+						<rect id="piece-played" width="80" height="78"></rect>
+						<rect id="col-check" width="80" height="80"></rect>
+						<!-- circle id="new-piece" r="30"></circle -->
+					</defs>
+					<g id="bg-level-1"></g>
+					<g id="bg-level-2"></g>
+					<g id="bg-level-3"></g>
+				</svg>
+        </div>
+        
+    </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+			  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+			  crossorigin="anonymous"></script>
+    
+    <script src="/js/connect4.js"></script>
+	
+    </script>
+</html>
