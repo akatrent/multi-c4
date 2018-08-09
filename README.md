@@ -1,16 +1,7 @@
-# multi-c4
-Multiplayer Connect 4 Game
+# Collaborative White board
+Multi user Collaborative White board tool
 
-Beginning to build a Multiplayer Connect 4 Game. 
+hosted on AWS. 
 
-Work in progress.
-
-Basic multiplayer board and player movement hosted on AWS. 
-
-http://ec2-54-193-48-215.us-west-1.compute.amazonaws.com:9000/
-
-TODO:
-Add connect 4 board and player pieces.
-Complete game functionality.
-Add user login system.
+http://ec2-54-193-121-90.us-west-1.compute.amazonaws.com:9000/
 
